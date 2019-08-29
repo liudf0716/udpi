@@ -1,0 +1,5 @@
+[gerrit]
+host=gerrit.fd.io
+port=29418
+project=udpi.git
+defaultbranch=master
