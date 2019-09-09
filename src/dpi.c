@@ -508,7 +508,7 @@ dpi_add_del_rx_flow (u32 hw_if_index, u32 flow_id, int is_add, u32 is_ipv6)
 
   dpi_flow = pool_elt_at_index (dm->dpi_flows, flow_id);
 
-  src_port.port = dpi_flow->key.dst_port;
+  src_port.port = dpi_flow->key.src_port;
   src_port.mask = ~0;
   dst_port.port = dpi_flow->key.dst_port;
   dst_port.mask = ~0;
