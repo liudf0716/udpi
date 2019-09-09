@@ -26,8 +26,8 @@
 #include <vnet/plugin/plugin.h>
 #include <vnet/fib/fib_entry.h>
 #include <vnet/fib/fib_table.h>
-#include <vpp/app/version.h>
-#include <dpi/dpi.h>
+//#include <vpp/app/version.h>
+#include "dpi.h"
 
 
 extern dpi_main_t dpi_main;

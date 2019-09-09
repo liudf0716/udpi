@@ -22,7 +22,7 @@
 #include <vlib/vlib.h>
 #include <vlib/unix/unix.h>
 
-#include <dpi/dpi.h>
+#include "../dpi.h"
 
 typedef enum
 {

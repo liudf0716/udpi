@@ -24,13 +24,13 @@
 #include <vppinfra/byte_order.h>
 #include <vlibmemory/api.h>
 
-#include <dpi/dpi.h>
+#include "dpi.h"
 
 
 #define vl_msg_id(n,h) n,
 typedef enum
 {
-#include <dpi/dpi.api.h>
+#include "dpi.api.h"
   /* We'll want to know how many messages IDs we need... */
   VL_MSG_FIRST_AVAILABLE,
 } vl_msg_id_t;
@@ -38,27 +38,27 @@ typedef enum
 
 /* define message structures */
 #define vl_typedefs
-#include <dpi/dpi.api.h>
+#include "dpi.api.h"
 #undef vl_typedefs
 
 /* define generated endian-swappers */
 #define vl_endianfun
-#include <dpi/dpi.api.h>
+#include "dpi.api.h"
 #undef vl_endianfun
 
 /* instantiate all the print functions we know about */
 #define vl_print(handle, ...) vlib_cli_output (handle, __VA_ARGS__)
 #define vl_printfun
-#include <dpi/dpi.api.h>
+#include "dpi.api.h"
 #undef vl_printfun
 
 /* Get the API version number */
 #define vl_api_version(n,v) static u32 api_version=(v);
-#include <dpi/dpi.api.h>
+#include "dpi.api.h"
 #undef vl_api_version
 
 #define vl_msg_name_crc_list
-#include <dpi/dpi.api.h>
+#include "dpi.api.h"
 #undef vl_msg_name_crc_list
 
 #define REPLY_MSG_ID_BASE dm->msg_id_base

@@ -27,13 +27,13 @@
 #include <vnet/fib/fib_entry.h>
 #include <vnet/fib/fib_table.h>
 #include <vnet/mfib/mfib_table.h>
-#include <vnet/adj/adj_mcast.h>
+//#include <vnet/adj/adj_mcast.h>
 #include <vnet/dpo/dpo.h>
 #include <vnet/plugin/plugin.h>
-#include <vpp/app/version.h>
+//#include <vpp/app/version.h>
 #include <vnet/flow/flow.h>
 
-#include <dpi/dpi.h>
+#include "dpi.h"
 
 dpi_main_t dpi_main;
 dpi_entry_t *dpi_dbs = NULL;
@@ -709,7 +709,7 @@ VLIB_INIT_FUNCTION (dpi_init);
 
 /* *INDENT-OFF* */
 VLIB_PLUGIN_REGISTER () = {
-    .version = VPP_BUILD_VER,
+//    .version = VPP_BUILD_VER,
     .description = "Deep Packet Inspection",
 };
 /* *INDENT-ON* */

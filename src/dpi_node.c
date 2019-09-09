@@ -22,11 +22,11 @@
 #include <vppinfra/pool.h>
 #include <vppinfra/vec.h>
 #include <vnet/plugin/plugin.h>
-#include <vpp/app/version.h>
+//#include <vpp/app/version.h>
 #include <vnet/flow/flow.h>
 #include <vnet/tcp/tcp_packet.h>
 
-#include <dpi/dpi.h>
+#include "dpi.h"
 
 vlib_node_registration_t dpi4_input_node;
 vlib_node_registration_t dpi6_input_node;
@@ -535,7 +535,6 @@ dpi_input_inline (vlib_main_t * vm,
       u16 dst_port = 0;
       segment *seg = 0;
       segment *prev_seg = 0;
-      int rv;
 
       bi0 = to_next[0] = from[0];
       b0 = vlib_get_buffer (vm, bi0);
@@ -547,7 +546,6 @@ dpi_input_inline (vlib_main_t * vm,
           ip4_main_t *im4 = &ip4_main;
           fib_index0 = vec_elt (im4->fib_index_by_sw_if_index,
                                 vnet_buffer(b0)->sw_if_index[VLIB_RX]);
-          rv =
           parse_ip4_packet_and_lookup(ip40, fib_index0, &key40,
                                       &not_found0, &flow_id0);
         }
@@ -557,13 +555,9 @@ dpi_input_inline (vlib_main_t * vm,
           ip6_main_t *im6 = &ip6_main;
           fib_index0 = vec_elt (im6->fib_index_by_sw_if_index,
                                 vnet_buffer(b0)->sw_if_index[VLIB_RX]);
-          rv =
           parse_ip6_packet_and_lookup(ip60, fib_index0, &key60,
                                       &not_found0, &flow_id0);
         }
-
-      if (!rv)
-        goto enqueue0;
 
       is_reverse0 = (u8)((flow_id0 >> 63) & 0x1);
       flow_index0 = (u32)(flow_id0 & (u32)(~0));
