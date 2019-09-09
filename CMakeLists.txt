@@ -59,7 +59,7 @@ set(UDPI_PLUGIN_FILES
     src/dpi_api.c
     src/dpi_cli.c
     src/dpi_node.c
-    src/protocols/dpi_ssl.c 
+    src/protocols/dpi_ssl.c
 )
 
 set(UDPI_PLUGIN_HEADER_FILES
@@ -103,7 +103,7 @@ execute_process(
     COMMAND curl https://git.fd.io/vpp/plain/src/vpp-api/vapi/vapi_c_gen.py?h=stable/1908  -o ${CMAKE_BINARY_DIR}/vapi_c_gen.py
     COMMAND curl https://git.fd.io/vpp/plain/src/vpp-api/vapi/vapi_cpp_gen.py?h=stable/1908  -o ${CMAKE_BINARY_DIR}/vapi_cpp_gen.py
     )
- 
+
 add_custom_command(
     COMMAND chmod +x  ${CMAKE_BINARY_DIR}/vapi_json_parser.py ${CMAKE_BINARY_DIR}/vapi_c_gen.py ${CMAKE_BINARY_DIR}/vapi_cpp_gen.py
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.h
@@ -119,6 +119,7 @@ add_custom_command(
 
 include_directories(SYSTEM)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUDPI_VPP_PLUGIN=1")
 add_library(udpi_plugin SHARED
@@ -127,7 +128,6 @@ add_library(udpi_plugin SHARED
     ${UDPI_VAPI_GENERATED_FILES})
 target_link_libraries(udpi_plugin ${HYPERSCAN_LIB})
 
-file(COPY ${UDPI_API_GENERATED_FILES} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/src )
 file(COPY ${UDPI_PLUGIN_HEADER_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins)
 
