@@ -8,16 +8,16 @@ for Deep Packet Inspection, integrated with the general purpose FD.io VPP stack.
 It leverages industry regex matching library to provide a rich set of features,
    which can be used in IPS/IDS, Web Firewall and similar applications.
 
-For more information on UDPI and its features please visit the
-[UDPI website](https://wiki.fd.io/view/UDPI)
+   For more information on UDPI and its features please visit the
+   [UDPI website](https://wiki.fd.io/view/UDPI)
 
 
 ## Changes
 
-Details of the changes leading up to this version of UDPI can be found under
-@ref release notes.
+   Details of the changes leading up to this version of UDPI can be found under
+   @ref release notes.
 
-## Quick Start ##(in CentOS cmake = cmake3, gcc = devtoolset-7, follow vpp)
+## Quick Start ##
 ```
 From the code tree root
 
@@ -45,7 +45,7 @@ $ make
 $ sudo make install
 
 CMAKE variables:
-- CMKAE_INSTALL_LIBDIR -- set the library directory. In CentOS, it is lib or lib64, in debian and it's releated, it is lib/x86_64-linux-gnu
+- CMKAE_INSTALL_LIBDIR -- set the library directory. In CentOS, it is lib or lib64, in debian and it's releated, it is lib/x86_64-linux-gnu 
 - CMAKE_INSTALL_PREFIX -- set the install directory for the udpi-plugin. This is the common path to the lib folder containing vpp_plugins and vpp_api_test_plugins folders. Default is /usr/local.
 - VPP_HOME -- set the directory containing the include and lib directories of vpp.
 ```
@@ -181,7 +181,7 @@ The CLI commands for the udpi plugin start all with the udpi keyword. To see the
 This software is distributed under the following license:
 
 ```
-Copyright (c) 2018-2019 Intel and/or its affiliates.
+Copyright (c) 2017-2019 Cisco and/or its affiliates.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at:
@@ -192,6 +192,6 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
-limitations under the License.
+limitations under the License. 
 
 ```
