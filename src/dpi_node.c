@@ -824,6 +824,7 @@ dpi_flow_input_inline (vlib_main_t * vm,
 
 	  bi0 = to_next[0] = from[0];
 	  b0 = vlib_get_buffer (vm, bi0);
+	  vlib_buffer_advance (b0, +(sizeof (ethernet_header_t)));
 	  ip_len0 = vlib_buffer_length_in_chain (vm, b0);
 
 	  if (is_ip4)

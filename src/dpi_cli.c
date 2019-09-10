@@ -111,6 +111,8 @@ dpi_flow_add_del_command_fn (vlib_main_t * vm,
   if (rv < 0)
     return clib_error_return (0, "reverse flow error: %d", rv);
 
+  vlib_cli_output(vm, "dpi flow id\n%u", dpi_flow_id);
+
   return 0;
 }
 

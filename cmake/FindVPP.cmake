@@ -1,6 +1,4 @@
-#
-# Copyright (c) 2018 PANTHEON.tech.
-#
+# Copyright (c) 2017-2019 Cisco and/or its affiliates.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at:
@@ -13,197 +11,64 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(VPP_SEARCH_PATH_LIST
+  ${VPP_HOME}
+  $ENV{VPP_HOME}
+  /usr/local
+  /opt
+  /usr
+)
 
-# - Try to find LibVPP
-# Once done this will define
-#
-#  VPP_FOUND - system has VPP
-#  VPP_INCLUDE_DIRS - the VPP include directory
-#  VPP_LIBRARIES - Link these to use LibSSH
+find_path(VPP_INCLUDE_DIR vnet/vnet.h
+  HINTS ${VPP_SEARCH_PATH_LIST}
+  PATH_SUFFIXES include
+  DOC "Find the VPP includes"
+)
 
+find_library(VPP_LIBRARY_MEMORYCLIENT
+  NAMES vlibmemoryclient
+  HINTS ${VPP_SEARCH_PATH_LIST}
+  PATH_SUFFIXES lib lib64
+  DOC "Find the Vpp Memoryclient library"
+)
 
-if (VPP_LIBRARIES AND VPP_INCLUDE_DIRS)
-  # in cache already
-  set(VPP_FOUND TRUE)
-else (VPP_LIBRARIES AND VPP_INCLUDE_DIRS)
+find_library(VPP_LIBRARY_SVM
+  NAMES svm
+  HINTS ${VPP_SEARCH_PATH_LIST}
+  PATH_SUFFIXES lib lib64
+  DOC "Find the Vpp svm library"
+)
 
-  set(VPP_INCLUDE_PATH
-    /usr/include
-    /usr/local/include
-    /opt/local/include
-    /sw/include
-  )
+find_library(VPP_LIBRARY_INFRA
+  NAMES vppinfra
+  HINTS ${VPP_SEARCH_PATH_LIST}
+  PATH_SUFFIXES lib lib64
+  DOC "Find the Vpp infra library"
+)
 
-  set(VPP_LIBRARY_PATH
-    /usr/lib
-    /usr/lib64
-    /usr/local/lib
-    /usr/local/lib64
-    /opt/local/lib
-    /sw/lib
-  )
+find_library(VPP_LIBRARY_VATPLUGIN
+  NAMES vatplugin
+  HINTS ${VPP_SEARCH_PATH_LIST}
+  PATH_SUFFIXES lib lib64
+  DOC "Find the Vpp vatplugin library"
+)
 
-  find_path(VNET_INCLUDE_DIR
-    NAMES
-      vnet/vnet.h
-    PATHS
-      ${VPP_INCLUDE_PATH}
-      ${CMAKE_INCLUDE_PATH}
-      ${CMAKE_INSTALL_PREFIX}/include
+find_library(VPP_LIBRARY_VLIB
+  NAMES vlib
+  HINTS ${VPP_SEARCH_PATH_LIST}
+  PATH_SUFFIXES lib lib64
+  DOC "Find the Vpp vlib library"
+)
 
-  )
+find_library(VPP_LIBRARY_VPPAPICLIENT
+  NAMES vppapiclient
+  HINTS ${VPP_SEARCH_PATH_LIST}
+  PATH_SUFFIXES lib lib64
+  DOC "Find the Vpp vlib library"
+)
 
-  find_path(VLIB_API_INCLUDE_DIR
-    NAMES
-      vlibapi/api.h
-    PATHS
-      ${VPP_INCLUDE_PATH}
-      ${CMAKE_INCLUDE_PATH}
-      ${CMAKE_INSTALL_PREFIX}/include
-  )
+set(VPP_LIBRARIES ${VPP_LIBRARY_MEMORYCLIENT} ${VPP_LIBRARY_SVM} ${VPP_LIBRARY_INFRA} ${VPP_LIBRARY_VATPLUGIN} ${VPP_LIBRARY_VLIB})
+set(VPP_INCLUDE_DIRS ${VPP_INCLUDE_DIR} ${VPP_INCLUDE_DIR}/vpp_plugins)
 
-  find_path(VLIBMEMORY_INCLUDE_DIR
-    NAMES
-      vlibmemory/api.h
-    PATHS
-      ${VPP_INCLUDE_PATH}
-      ${CMAKE_INCLUDE_PATH}
-      ${CMAKE_INSTALL_PREFIX}/include
-  )
-
-  find_path(VPP_MSG_INCLUDE_DIR
-    NAMES
-      vpp/api/vpe_msg_enum.h
-    PATHS
-      ${VPP_INCLUDE_PATH}
-      ${CMAKE_INCLUDE_PATH}
-      ${CMAKE_INSTALL_PREFIX}/include
-  )
-
-  find_path(VPP_ALL_INCLUDE_DIR
-    NAMES
-      vpp/api/vpe_all_api_h.h
-    PATHS
-      ${VPP_INCLUDE_PATH}
-      ${CMAKE_INCLUDE_PATH}
-      ${CMAKE_INSTALL_PREFIX}/include
-  )
-
-  find_path(VAPI_INCLUDE_DIR
-    NAMES
-      vapi/interface.api.vapi.h
-    PATHS
-      ${VPP_INCLUDE_PATH}
-      ${CMAKE_INCLUDE_PATH}
-      ${CMAKE_INSTALL_PREFIX}/include
-  )
-
-  find_path(VOM_INCLUDE_DIR
-    NAMES
-      vom/om.hpp
-    PATHS
-      ${VPP_INCLUDE_PATH}
-      ${CMAKE_INCLUDE_PATH}
-      ${CMAKE_INSTALL_PREFIX}/include
-  )
-
-  find_library(VLIBMEMORYCLIENT_LIBRARY
-    NAMES
-      vlibmemoryclient
-      libvlibmemoryclient
-    PATHS
-      ${VPP_LIBARY_PATH}
-      ${CMAKE_LIBRARY_PATH}
-      ${CMAKE_INSTALL_PREFIX}/lib
-  )
-
-  find_library(SVM_LIBRARY
-    NAMES
-      svm
-      libsvm
-    PATHS
-      ${VPP_LIBRARY_PATH}
-      ${CMAKE_LIBRARY_PATH}
-      ${CMAKE_INSTALL_PREFIX}/lib
-  )
-
-   find_library(VPPINFRA_LIBRARY
-    NAMES
-      vppinfra
-      libvppinfra
-    PATHS
-      ${VPP_LIBRARY_PATH}
-      ${CMAKE_LIBRARY_PATH}
-      ${CMAKE_INSTALL_PREFIX}/lib
-  )
-
-   find_library(VLIB_LIBRARY
-    NAMES
-      vlib
-      libvlib
-    PATHS
-      ${VPP_LIBRARY_PATH}
-      ${CMAKE_LIBRARY_PATH}
-      ${CMAKE_INSTALL_PREFIX}/lib
-  )
-
-   find_library(VATPLUGIN_LIBRARY
-    NAMES
-      vatplugin
-      libvatplugin
-    PATHS
-      ${VPP_LIBRARY_PATH}
-      ${CMAKE_LIBRARY_PATH}
-      ${CMAKE_INSTALL_PREFIX}/lib
-  )
-
-   find_library(VAPI_LIBRARY
-    NAMES
-      vapiclient
-      libvapiclient
-    PATHS
-      ${VPP_LIBRARY_PATH}
-      ${CMAKE_LIBRARY_PATH}
-      ${CMAKE_INSTALL_PREFIX}/lib
-  )
-
-   find_library(VOM_LIBRARY
-    NAMES
-      vom
-      libvom
-    PATHS
-      ${VPP_LIBRARY_PATH}
-      ${CMAKE_LIBRARY_PATH}
-      ${CMAKE_INSTALL_PREFIX}/lib
-  )
-
-  if (VPP_INCLUDE_DIR AND VPP_LIBRARY)
-    set(VPP_FOUND TRUE)
-  else (VPP_INCLUDE_DIR AND VPP_LIBRARY)
-    set(VPP_FOUND FALSE)
-  endif (VPP_INCLUDE_DIR AND VPP_LIBRARY)
-
-  set(VPP_INCLUDE_DIRS
-    ${VNET_INCLUDE_DIR}
-    ${VLIB_API_INCLUDE_DIR}
-    ${VLIB_MEMORY_INCLUDE_DIR}
-    ${VPP_MSG_INCLUDE_DIR}
-    ${VPP_ALL_INCLUDE_DIR}
-    ${VAPI_INCLUDE_DIR}
-    ${VOM_INCLUDE_DIR}
-  )
-
-  set(VPP_LIBRARIES
-    ${VLIBMEMORYCLIENT_LIBRARY}
-    ${SVM_LIBRARY}
-    ${VPPINFRA_LIBRARY}
-    ${VLIB_LIBRARY}
-    ${VATPLUGIN_LIBRARY}
-    ${VAPI_LIBRARY}
-    ${VOM_LIBRARY}
-  )
-
-  # show the VPP_INCLUDE_DIRS and VPP_LIBRARIES variables only in the advanced view
-  mark_as_advanced(VPP_INCLUDE_DIRS VPP_LIBRARIES)
-
-endif (VPP_LIBRARIES AND VPP_INCLUDE_DIRS)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Vpp DEFAULT_MSG VPP_LIBRARIES VPP_INCLUDE_DIRS)
