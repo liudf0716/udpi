@@ -45,7 +45,7 @@ $ make
 $ sudo make install
 
 CMAKE variables:
-- CMKAE_INSTALL_LIBDIR -- set the library directory. In CentOS, it is lib or lib64, in debian and it's releated, it is lib/x86_64-linux-gnu
+- CMKAE_INSTALL_LIBDIR -- set the library directory. In CentOS, it is lib or lib64, in debian and it's related, it is lib/x86_64-linux-gnu
 - CMAKE_INSTALL_PREFIX -- set the install directory for the udpi-plugin. This is the common path to the lib folder containing vpp_plugins and vpp_api_test_plugins folders. Default is /usr/local.
 - VPP_HOME -- set the directory containing the include and lib directories of vpp.
 ```
