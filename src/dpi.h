@@ -38,6 +38,9 @@
 #include <hs/hs_runtime.h>
 #include "dpi_app_match.h"
 
+extern vlib_node_registration_t dpi4_flow_input_node;
+extern vlib_node_registration_t dpi6_flow_input_node;
+
 typedef u8 *regex_t;
 
 typedef struct
@@ -288,6 +291,7 @@ int dpi_add_del_rx_flow (u32 hw_if_index, u32 flow_id, int is_add,
 			 u32 is_ipv6);
 int dpi_tcp_reass (tcp_reass_args_t * a);
 void dpi_flow_bypass_mode (u32 sw_if_index, u8 is_ip6, u8 is_enable);
+void dpi_flow_offload_mode (u32 sw_if_index, u8 is_ip6, u8 is_enable);
 int dpi_search_host_protocol (dpi_flow_info_t * flow,
 			      char *str_to_match,
 			      u32 str_to_match_len,
@@ -308,7 +312,8 @@ typedef enum
 
 #define foreach_dpi_input_next        \
 _(DROP, "error-drop")                 \
-_(IP4_LOOKUP, "ip4-lookup")
+_(IP4_LOOKUP, "ip4-lookup")           \
+_(IP6_LOOKUP, "ip6-lookup")
 
 typedef enum
 {
@@ -318,8 +323,59 @@ typedef enum
     DPI_INPUT_N_NEXT,
 } dpi_input_next_t;
 
-#endif /* included_vnet_dpi_h */
+#endif
 
+#define foreach_dpi_input_error \
+ _(NONE, "no error") \
+ _(NO_SUCH_FLOW, "flow not existed")
+
+typedef enum
+{
+#define _(sym,str) DPI_INPUT_ERROR_##sym,
+  foreach_dpi_input_error
+#undef _
+    DPI_INPUT_N_ERROR,
+} dpi_input_error_t;
+
+static char *dpi_input_error_strings[] = {
+#define _(sym,string) string,
+  foreach_dpi_input_error
+#undef _
+};
+
+#define foreach_dpi_flow_input_next        \
+_(DROP, "error-drop")                      \
+_(IP4_LOOKUP, "ip4-lookup")                \
+_(IP6_LOOKUP, "ip6-lookup")
+
+typedef enum
+{
+#define _(s,n) DPI_FLOW_NEXT_##s,
+  foreach_dpi_flow_input_next
+#undef _
+    DPI_FLOW_N_NEXT,
+} dpi_flow_input_next_t;
+
+#define foreach_dpi_flow_error                    \
+  _(NONE, "no error")                           \
+  _(IP_CHECKSUM_ERROR, "Rx ip checksum errors")             \
+  _(IP_HEADER_ERROR, "Rx ip header errors")             \
+  _(UDP_CHECKSUM_ERROR, "Rx udp checksum errors")               \
+  _(UDP_LENGTH_ERROR, "Rx udp length errors")
+
+typedef enum
+{
+#define _(f,s) DPI_FLOW_ERROR_##f,
+  foreach_dpi_flow_error
+#undef _
+    DPI_FLOW_N_ERROR,
+} dpi_flow_error_t;
+
+static char *dpi_flow_error_strings[] = {
+#define _(n,s) s,
+  foreach_dpi_flow_error
+#undef _
+};
 
 /*
  * fd.io coding-style-patch-verification: ON

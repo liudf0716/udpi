@@ -205,6 +205,7 @@ dpi_flow_offload_command_fn (vlib_main_t * vm,
   u32 hw_if_index = ~0;
   int is_add = 1;
   u32 is_ipv6 = 0;
+  u32 is_enable = 1;
   dpi_flow_entry_t *flow;
   vnet_hw_interface_t *hw_if;
   u32 rx_fib_index = ~0;
@@ -259,6 +260,8 @@ dpi_flow_offload_command_fn (vlib_main_t * vm,
   if (dpi_add_del_rx_flow (hw_if_index, rx_flow_id, is_add, is_ipv6))
     return clib_error_return (0, "error %s flow",
 			      is_add ? "enabling" : "disabling");
+
+  dpi_flow_offload_mode (hw_if_index, is_ipv6, is_enable);
 
   return 0;
 }

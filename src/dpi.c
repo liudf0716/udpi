@@ -323,6 +323,7 @@ dpi_flow_add_del (dpi_add_del_flow_args_t * a, u32 * flow_idp)
       int add_failed;
       if (is_ip6)
 	{
+	  flow->next_index = DPI_INPUT_NEXT_IP6_LOOKUP;
 	  key6.value = (u64) flow_id;
 	  add_failed = clib_bihash_add_del_48_8 (&dm->dpi6_flow_by_key,
 						 &key6, 1 /*add */ );
@@ -530,7 +531,7 @@ dpi_add_del_rx_flow (u32 hw_if_index, u32 flow_id, int is_add, u32 is_ipv6)
 		.actions =
 		  VNET_FLOW_ACTION_REDIRECT_TO_NODE | VNET_FLOW_ACTION_MARK,
 		.mark_flow_id = flow_id + dm->flow_id_start,
-		.redirect_node_index = 0,
+		.redirect_node_index = dpi4_flow_input_node.index,
 		.type = VNET_FLOW_TYPE_IP4_N_TUPLE,
 		.ip4_n_tuple = {
 				.src_addr = src_addr4,
@@ -560,7 +561,7 @@ dpi_add_del_rx_flow (u32 hw_if_index, u32 flow_id, int is_add, u32 is_ipv6)
 		.actions =
 		  VNET_FLOW_ACTION_REDIRECT_TO_NODE | VNET_FLOW_ACTION_MARK,
 		.mark_flow_id = flow_id + dm->flow_id_start,
-		.redirect_node_index = 0,
+		.redirect_node_index = dpi6_flow_input_node.index,
 		.type = VNET_FLOW_TYPE_IP6_N_TUPLE,
 		.ip6_n_tuple = {
 				.src_addr = src_addr6,
@@ -591,6 +592,17 @@ dpi_flow_bypass_mode (u32 sw_if_index, u8 is_ip6, u8 is_enable)
   else
     vnet_feature_enable_disable ("ip4-unicast", "dpi4-input",
 				 sw_if_index, is_enable, 0, 0);
+}
+
+void
+dpi_flow_offload_mode (u32 hw_if_index, u8 is_ip6, u8 is_enable)
+{
+  if (is_ip6)
+    vnet_feature_enable_disable ("ip4-unicast", "dpi6-flow-input",
+				 hw_if_index, is_enable, 0, 0);
+  else
+    vnet_feature_enable_disable ("ip6-unicast", "dpi4-flow-input",
+				 hw_if_index, is_enable, 0, 0);
 }
 
 int
