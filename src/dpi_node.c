@@ -33,25 +33,6 @@ vlib_node_registration_t dpi6_input_node;
 vlib_node_registration_t dpi4_flow_input_node;
 vlib_node_registration_t dpi6_flow_input_node;
 
-
-#define foreach_dpi_input_error \
- _(NONE, "no error") \
- _(NO_SUCH_FLOW, "flow not existed")
-
-typedef enum
-{
-#define _(sym,str) DPI_INPUT_ERROR_##sym,
-  foreach_dpi_input_error
-#undef _
-    DPI_INPUT_N_ERROR,
-} dpi_input_error_t;
-
-static char *dpi_input_error_strings[] = {
-#define _(sym,string) string,
-  foreach_dpi_input_error
-#undef _
-};
-
 typedef struct
 {
   u32 next_index;
@@ -72,6 +53,22 @@ VNET_FEATURE_INIT (dpi6_input, static) =
 {
   .arc_name = "ip6-unicast",
   .node_name = "dpi6-input",
+  .runs_before = VNET_FEATURES ("ip6-lookup"),
+};
+/* *INDENT-on* */
+
+/* *INDENT-OFF* */
+VNET_FEATURE_INIT (dpi4_flow_input, static) =
+{
+  .arc_name = "ip4-unicast",
+  .node_name = "dpi4-flow-input",
+  .runs_before = VNET_FEATURES ("ip4-lookup"),
+};
+
+VNET_FEATURE_INIT (dpi6_flow_input, static) =
+{
+  .arc_name = "ip6-unicast",
+  .node_name = "dpi6-flow-input",
   .runs_before = VNET_FEATURES ("ip6-lookup"),
 };
 /* *INDENT-on* */
@@ -736,40 +733,6 @@ dpi6_input_init (vlib_main_t * vm)
 VLIB_INIT_FUNCTION (dpi6_input_init);
 
 
-
-#define foreach_dpi_flow_input_next        \
-_(DROP, "error-drop")                      \
-_(IP4_LOOKUP, "ip4-lookup")
-
-typedef enum
-{
-#define _(s,n) DPI_FLOW_NEXT_##s,
-  foreach_dpi_flow_input_next
-#undef _
-    DPI_FLOW_N_NEXT,
-} dpi_flow_input_next_t;
-
-#define foreach_dpi_flow_error                    \
-  _(NONE, "no error")                           \
-  _(IP_CHECKSUM_ERROR, "Rx ip checksum errors")             \
-  _(IP_HEADER_ERROR, "Rx ip header errors")             \
-  _(UDP_CHECKSUM_ERROR, "Rx udp checksum errors")               \
-  _(UDP_LENGTH_ERROR, "Rx udp length errors")
-
-typedef enum
-{
-#define _(f,s) DPI_FLOW_ERROR_##f,
-  foreach_dpi_flow_error
-#undef _
-    DPI_FLOW_N_ERROR,
-} dpi_flow_error_t;
-
-static char *dpi_flow_error_strings[] = {
-#define _(n,s) s,
-  foreach_dpi_flow_error
-#undef _
-};
-
 static_always_inline u8
 dpi_check_ip4 (ip4_header_t * ip4, u16 payload_len)
 {
@@ -805,7 +768,7 @@ dpi_flow_input_inline (vlib_main_t * vm,
 
       while (n_left_from > 0 && n_left_to_next > 0)
 	{
-	  u32 bi0, next0 = DPI_FLOW_NEXT_IP4_LOOKUP;
+	  u32 bi0, next0 = 0;
 	  vlib_buffer_t *b0;
 	  ip4_header_t *ip40;
 	  ip6_header_t *ip60;
@@ -838,7 +801,6 @@ dpi_flow_input_inline (vlib_main_t * vm,
 	      dpi_check_ip6 (ip60, ip_len0);
 	    }
 
-	  ASSERT (b0->flow_id != 0);
 	  flow_id0 = b0->flow_id - dm->flow_id_start;
 
 	  is_reverse0 = (u32) ((flow_id0 >> 31) & 0x1);
