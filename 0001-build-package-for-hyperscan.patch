@@ -1,0 +1,320 @@
+From a32ad7137d79aeaa3b903a80159aaf8771d42fdb Mon Sep 17 00:00:00 2001
+From: Junfeng Wang <drenfong.wang@intel.com>
+Date: Wed, 13 Nov 2019 13:40:55 +0800
+Subject: [PATCH] build package for hyperscan
+
+Signed-off-by: Junfeng Wang <drenfong.wang@intel.com>
+---
+ .gitignore           |   2 +-
+ CMakeLists.txt       |   3 +
+ Makefile             |  93 +++++++++++++++++++++++++++++++
+ README.md            |   8 +++
+ build-root/.gitkeep  |   0
+ cmake/Packager.cmake | 151 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 256 insertions(+), 1 deletion(-)
+ create mode 100644 Makefile
+ create mode 100644 build-root/.gitkeep
+ create mode 100644 cmake/Packager.cmake
+
+diff --git a/.gitignore b/.gitignore
+index 607453a..07e42f6 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -56,7 +56,7 @@ pcre/pcregrep
+ pcre/pcretest
+ 
+ # Autoconf/automake/libtool noise
+-Makefile
++# Makefile
+ Makefile.in
+ aclocal.m4
+ config.cache
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3801f99..865731e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1372,3 +1372,6 @@ endif ()
+ if(NOT WIN32)
+     add_subdirectory(examples)
+ endif()
++
++include(Packager)
++make_packages()
+diff --git a/Makefile b/Makefile
+new file mode 100644
+index 0000000..2582990
+--- /dev/null
++++ b/Makefile
+@@ -0,0 +1,93 @@
++# Copyright (c) 2018 Intel and/or its affiliates.
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at:
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++
++export WS_ROOT=$(CURDIR)
++export BR=$(WS_ROOT)/build-root
++PLATFORM?=hyperscan
++
++
++##############
++#OS Detection#
++##############
++ifneq ($(shell uname),Darwin)
++OS_ID        = $(shell grep '^ID=' /etc/os-release | cut -f2- -d= | sed -e 's/\"//g')
++OS_VERSION_ID= $(shell grep '^VERSION_ID=' /etc/os-release | cut -f2- -d= | sed -e 's/\"//g')
++endif
++
++ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
++PKG=deb
++cmake=cmake
++else ifeq ($(filter rhel centos fedora opensuse opensuse-leap opensuse-tumbleweed,$(OS_ID)),$(OS_ID))
++PKG=rpm
++cmake=cmake3
++endif
++
++#####
++#DEB#
++#####
++#Dependencies to build
++DEB_DEPENDS = curl build-essential autoconf automake ccache git cmake wget coreutils libpcre gtest gtest-dev ragel
++#####
++#RPM#
++#####
++#Dependencies to build
++RPM_DEPENDS = curl autoconf automake ccache cmake3 wget gcc gcc-c++ git gtest gtest-devel ragel python-sphinx boost169-devel
++
++.PHONY: help install-dep build build-package clean distclean
++
++help:
++	@echo "Make Targets:"
++	@echo " install-dep            - install software dependencies"
++	@echo " build-package          - build rpm or deb package"
++	@echo " clean                  - clean all build"
++	@echo " distclean              - remove all build directory"
++
++install-dep:
++ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
++ifeq ($(OS_VERSION_ID),14.04)
++	@sudo -E apt-get -y --force-yes install software-properties-common
++endif
++	@sudo -E apt-get update
++	@sudo -E apt-get $(APT_ARGS) -y --force-yes install $(DEB_DEPENDS)
++else ifeq ($(OS_ID),centos)
++	@sudo -E yum install -y $(RPM_DEPENDS) epel-release centos-release-scl
++else
++	$(error "This option currently works only on Ubuntu, Debian, Centos or openSUSE systems")
++endif
++
++
++build-package:
++ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
++	@mkdir -p $(BR)/build-package/; cd $(BR)/build-package/;\
++	$(cmake) -DCMAKE_BUILD_TYPE=Release \
++	-DCMAKE_INSTALL_PREFIX:PATH=/usr $(WS_ROOT)/ -DBUILD_STATIC_AND_SHARED=ON;\
++	make package -j$(nproc);
++else ifeq ($(OS_ID),centos)
++	@rm -rf $(BR)/../include/boost;\
++	ln -vs /usr/include/boost169/boost $(BR)/../include/boost
++	@mkdir -p $(BR)/build-package/; cd $(BR)/build-package/;\
++	$(cmake) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_AND_SHARED=ON \
++	-DCMAKE_INSTALL_PREFIX:PATH=/usr $(WS_ROOT)/;\
++	make package -j$(nproc);
++endif
++	@# NEW INSTRUCTIONS TO BUILD-PACKAGE MUST BE DECLARED ON A NEW LINE WITH
++	@# '@' NOT WITH ';' ELSE BUILD-PACKAGE WILL NOT RETURN THE CORRECT
++	@# RETURN CODE FOR JENKINS CI
++	@rm -rf $(BR)/build-package/_CPack_Packages;
++
++clean:
++	@if [ -d $(BR)/build-package ] ; then cd $(BR)/build-package && make clean; fi
++
++distclean:
++	@rm -rf $(BR)/build-package
+diff --git a/README.md b/README.md
+index 9f4c037..6dd3789 100644
+--- a/README.md
++++ b/README.md
+@@ -41,3 +41,11 @@ sending email to the list, or by creating an issue on Github.
+ If you wish to contact the Hyperscan team at Intel directly, without posting
+ publicly to the mailing list, send email to
+ [hyperscan@intel.com](mailto:hyperscan@intel.com).
++
++# Build Package
++
++$ make
++$ make install-dep
++$ make build-package
++
++Package can be found in ./build-root/build-package/, named with hyperscan*.rpm.
+diff --git a/build-root/.gitkeep b/build-root/.gitkeep
+new file mode 100644
+index 0000000..e69de29
+diff --git a/cmake/Packager.cmake b/cmake/Packager.cmake
+new file mode 100644
+index 0000000..e99f70b
+--- /dev/null
++++ b/cmake/Packager.cmake
+@@ -0,0 +1,151 @@
++# Copyright (c) 2017-2019 Cisco and/or its affiliates.
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at:
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++#############
++# RPM/DEB/TGZ Packaging utils
++#
++
++set(CONTACT "dpi-dev@lists.fd.io" CACHE STRING "Contact")
++set(PACKAGE_MAINTAINER "Dpi Team" CACHE STRING "Maintainer")
++set(PACKAGE_VENDOR "fd.io" CACHE STRING "Vendor")
++
++# macro(set)
++
++macro(make_packages)
++  if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
++    # parse /etc/os-release
++    file(READ "/etc/os-release" os_version)
++    string(REPLACE "\n" ";" os_version ${os_version})
++    foreach(_ver ${os_version})
++      string(REPLACE "=" ";" _ver ${_ver})
++      list(GET _ver 0 _name)
++      list(GET _ver 1 _value)
++      set(OS_${_name} ${_value})
++    endforeach()
++
++    #extract version from git
++    execute_process(
++      COMMAND git describe --long --tag --match v*
++      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
++      OUTPUT_VARIABLE VER
++      OUTPUT_STRIP_TRAILING_WHITESPACE
++    )
++
++    if (NOT VER)
++      set(VER "v1.0")
++    endif()
++
++    string(REGEX REPLACE "v(.*)-([0-9]+)-(g[0-9a-f]+)" "\\1;\\2;\\3" VER ${VER})
++    list(GET VER 0 tag)
++    string(REPLACE "-" "~" tag ${tag})
++    list(GET VER 1 commit_num)
++    list(GET VER 2 commit_name)
++
++    message("${tag}")
++
++    if (NOT DEFINED ENV{BUILD_NUMBER})
++      set(bld "b1")
++    else()
++      set(bld "b$ENV{BUILD_NUMBER}")
++    endif()
++
++    message("Build number is: ${bld}")
++
++    #define DEB and RPM version numbers
++    if(${commit_num} EQUAL 0)
++      set(deb_ver "${tag}")
++      set(rpm_ver "${tag}")
++    else()
++      set(deb_ver "${tag}-${commit_num}-${commit_name}")
++      set(rpm_ver "${tag}-${commit_num}-${commit_name}")
++    endif()
++
++    get_cmake_property(components COMPONENTS)
++
++    if(OS_ID_LIKE MATCHES "debian")
++      set(CPACK_GENERATOR "DEB")
++      set(type "DEBIAN")
++
++      execute_process(
++        COMMAND dpkg --print-architecture
++        OUTPUT_VARIABLE arch
++        OUTPUT_STRIP_TRAILING_WHITESPACE
++      )
++
++      set(CPACK_PACKAGE_VERSION "${deb_ver}")
++      foreach(lc ${components})
++        if (${lc} MATCHES ".*Unspecified.*")
++          continue()
++        endif()
++
++        string(TOUPPER ${lc} uc)
++        set(CPACK_${type}_${uc}_FILE_NAME "${lc}_${deb_ver}_${arch}.deb")
++
++        set(DEB_DEPS)
++        if (NOT ${${lc}_DEB_DEPENDENCIES} STREQUAL "")
++          string(REPLACE "stable_version" ${tag} DEB_DEPS ${${lc}_DEB_DEPENDENCIES})
++        endif()
++
++        set(CPACK_${type}_${uc}_PACKAGE_DEPENDS "${DEB_DEPS}")
++        set(CPACK_${type}_${uc}_PACKAGE_NAME "${lc}")
++        set(CPACK_COMPONENT_${uc}_DESCRIPTION "${${lc}_DESCRIPTION}")
++      endforeach()
++    elseif(OS_ID_LIKE MATCHES "rhel")
++      set(CPACK_GENERATOR "RPM")
++      set(type "RPM")
++
++      execute_process(
++        COMMAND uname -m
++        OUTPUT_VARIABLE arch
++        OUTPUT_STRIP_TRAILING_WHITESPACE
++      )
++
++      set(CPACK_PACKAGE_VERSION "${rpm_ver}")
++      foreach(lc ${components})
++        if (${lc} MATCHES ".*Unspecified.*")
++          continue()
++        endif()
++
++        string(TOUPPER ${lc} uc)
++        set(CPACK_${type}_${uc}_DESCRIPTION "${${lc}_DESCRIPTION}")
++
++        set(RPM_DEPS)
++        if (NOT ${${lc}_DEB_DEPENDENCIES} STREQUAL "")
++          string(REPLACE "stable_version" ${tag} RPM_DEPS ${${lc}_RPM_DEPENDENCIES})
++        endif()
++
++        set(CPACK_${type}_${uc}_PACKAGE_REQUIRES "${RPM_DEPS}")
++
++        if(${lc} MATCHES ".*-dev")
++          set(package_name ${lc}el)
++        else()
++          set(package_name ${lc})
++        endif()
++
++        set(CPACK_RPM_${uc}_PACKAGE_NAME "${package_name}")
++        set(CPACK_${type}_${uc}_FILE_NAME "${package_name}-${rpm_ver}.${arch}.rpm")
++      endforeach()
++    endif()
++
++    if(CPACK_GENERATOR)
++      set(CPACK_PACKAGE_NAME ${ARG_NAME})
++      set(CPACK_STRIP_FILES OFF)
++      set(CPACK_PACKAGE_VENDOR "${PACKAGE_VENDOR}")
++      set(CPACK_COMPONENTS_IGNORE_GROUPS 1)
++      set(CPACK_${CPACK_GENERATOR}_COMPONENT_INSTALL ON)
++      set(CPACK_${type}_PACKAGE_MAINTAINER "Sweetcomb Team")
++      set(CPACK_${type}_PACKAGE_RELEASE 1)
++      include(CPack)
++    endif()
++  endif()
++endmacro()
+--
+1.8.3.1
+
