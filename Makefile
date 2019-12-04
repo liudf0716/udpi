@@ -75,12 +75,13 @@ build-package-hyperscan:
 build-package:
 ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
 	@mkdir -p $(BR)/build-package/; cd $(BR)/build-package/;\
-        $(cmake) -DCMAKE_INSTALL_PREFIX=/usr $(WS_ROOT)/;
+        $(cmake) -DCMAK_BUILD_TYPE=Release\
+        -DCMAKE_INSTALL_PREFIX=/usr $(WS_ROOT)/;\
         make package -j$(nproc);
 else ifeq ($(OS_ID),centos)
 	@mkdir -p $(BR)/build-package/; cd $(BR)/build-package/;\
         $(cmake) -DCMAKE_BUILD_TYPE=Release -DCMKAE_INSTALL_LIBDIR=lib\
-        -DCMAKE_INSTALL_PREFIX=/usr $(WS_ROOT)/;
+        -DCMAKE_INSTALL_PREFIX=/usr $(WS_ROOT)/;\
         make package -j$(nproc);
 endif
 	@# NEW INSTRUCTIONS TO BUILD-PACKAGE MUST BE DECLARED ON A NEW LINE WITH
