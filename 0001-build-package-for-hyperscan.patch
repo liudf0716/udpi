@@ -120,7 +120,7 @@ index 0000000..2582990
 +	@mkdir -p $(BR)/build-package/; cd $(BR)/build-package/;\
 +	$(cmake) -DCMAKE_BUILD_TYPE=Release \
 +	-DCMAKE_INSTALL_PREFIX:PATH=/usr $(WS_ROOT)/ -DBUILD_STATIC_AND_SHARED=ON;\
-+	make package -j$(nproc);
++	make package -j30;
 +else ifeq ($(OS_ID),centos)
 +	@rm -rf $(BR)/../include/boost;\
 +	ln -vs /usr/include/boost169/boost $(BR)/../include/boost
