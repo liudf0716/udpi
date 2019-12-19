@@ -41,7 +41,8 @@ DEB_DEPENDS = curl build-essential autoconf automake ccache git cmake wget coreu
 #RPM#
 #####
 #Dependencies to build
-RPM_DEPENDS = curl autoconf automake ccache cmake3 wget gcc gcc-c++ git gtest gtest-devel ragel python-sphinx boost169-devel
+RPM_DEPENDS = curl autoconf automake ccache cmake3 wget gcc gcc-c++ git gtest gtest-devel
+RPM_DEPENDS += ragel python-sphinx boost169-devel
 
 .PHONY: help install-dep build build-package build-package-hyperscan checkstyle distclean
 
@@ -61,7 +62,7 @@ endif
 	@sudo -E apt-get update
 	@sudo -E apt-get $(APT_ARGS) -y --force-yes install $(DEB_DEPENDS)
 else ifeq ($(OS_ID),centos)
-	@sudo -E yum install -y $(RPM_DEPENDS) epel-release centos-release-scl
+	@sudo -E yum install -y $(RPM_DEPENDS) epel-release centos-release-scl devtoolset-7
 else
 	$(error "This option currently works only on Ubuntu, Debian, Centos or openSUSE systems")
 endif
@@ -80,8 +81,9 @@ ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
         make package -j$(nproc);
 else ifeq ($(OS_ID),centos)
 	@mkdir -p $(BR)/build-package/; cd $(BR)/build-package/;\
-        $(cmake) -DCMAKE_BUILD_TYPE=Release -DCMKAE_INSTALL_LIBDIR=lib\
-        -DCMAKE_INSTALL_PREFIX=/usr $(WS_ROOT)/;\
+        $(cmake) -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib\
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PROGRAM_PATH:PATH="/opt/rh/devtoolset-7/root/bin"\
+        $(WS_ROOT)/;\
         make package -j$(nproc);
 endif
 	@# NEW INSTRUCTIONS TO BUILD-PACKAGE MUST BE DECLARED ON A NEW LINE WITH
