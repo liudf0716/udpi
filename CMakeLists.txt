@@ -99,22 +99,22 @@ execute_process(
     )
 # These files are missing from vpp binary distribution
 execute_process(
-    COMMAND curl https://git.fd.io/vpp/plain/src/vpp-api/vapi/vapi_json_parser.py?h=stable/1908 -o ${CMAKE_BINARY_DIR}/vapi_json_parser.py
-    COMMAND curl https://git.fd.io/vpp/plain/src/vpp-api/vapi/vapi_c_gen.py?h=stable/1908  -o ${CMAKE_BINARY_DIR}/vapi_c_gen.py
-    COMMAND curl https://git.fd.io/vpp/plain/src/vpp-api/vapi/vapi_cpp_gen.py?h=stable/1908  -o ${CMAKE_BINARY_DIR}/vapi_cpp_gen.py
+    COMMAND curl https://git.fd.io/vpp/plain/src/vpp-api/vapi/vapi_json_parser.py?h=stable/2001 -o ${CMAKE_BINARY_DIR}/vapi_json_parser.py
+    COMMAND curl https://git.fd.io/vpp/plain/src/vpp-api/vapi/vapi_c_gen.py?h=stable/2001  -o ${CMAKE_BINARY_DIR}/vapi_c_gen.py
+    COMMAND curl https://git.fd.io/vpp/plain/src/vpp-api/vapi/vapi_cpp_gen.py?h=stable/2001  -o ${CMAKE_BINARY_DIR}/vapi_cpp_gen.py
     )
 
 add_custom_command(
     COMMAND chmod +x  ${CMAKE_BINARY_DIR}/vapi_json_parser.py ${CMAKE_BINARY_DIR}/vapi_c_gen.py ${CMAKE_BINARY_DIR}/vapi_cpp_gen.py
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.h
-    COMMAND ${VPP_HOME}/bin/vppapigen --input ${CMAKE_CURRENT_SOURCE_DIR}/src/dpi.api --output ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.h
+    COMMAND ${VPP_HOME}/bin/vppapigen ARGS --includedir ${CMAKE_CURRENT_BINARY_DIR} --input ${CMAKE_CURRENT_SOURCE_DIR}/src/dpi.api --output ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.h --outputdir ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/dpi.api
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.json
-    COMMAND ${VPP_HOME}/bin/vppapigen JSON --input ${CMAKE_CURRENT_SOURCE_DIR}/src/dpi.api --output ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.json
+    COMMAND ${VPP_HOME}/bin/vppapigen ARGS JSON --includedir ${CMAKE_CURRENT_BINARY_DIR} --input ${CMAKE_CURRENT_SOURCE_DIR}/src/dpi.api --output ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.json --outputdir ${CMAKE_CURRENT_BINARY_DIR}/vapi/
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.vapi.h
-    COMMAND ${CMAKE_BINARY_DIR}/vapi_c_gen.py ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.json
+    COMMAND ${CMAKE_BINARY_DIR}/vapi_c_gen.py ARGS ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.json
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.vapi.hpp
-    COMMAND ${CMAKE_BINARY_DIR}/vapi_cpp_gen.py ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.json
+    COMMAND ${CMAKE_BINARY_DIR}/vapi_cpp_gen.py ARGS ${CMAKE_CURRENT_BINARY_DIR}/vpp_plugins/udpi/dpi.api.json
         )
 
 include_directories(SYSTEM)

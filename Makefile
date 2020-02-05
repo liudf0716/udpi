@@ -36,23 +36,24 @@ endif
 #DEB#
 #####
 #Dependencies to build
-DEB_DEPENDS = curl build-essential autoconf automake ccache git cmake wget coreutils ragel libboost-dev
+DEB_DEPENDS = curl build-essential autoconf automake ccache git cmake wget coreutils ragel
+DEB_DEPENDS += libboost-dev vpp vpp-dev python*-ply
 #####
 #RPM#
 #####
 #Dependencies to build
 RPM_DEPENDS = curl autoconf automake ccache cmake3 wget gcc gcc-c++ git gtest gtest-devel
-RPM_DEPENDS += ragel python-sphinx boost169-devel
+RPM_DEPENDS += ragel python-sphinx boost169-devel vpp vpp-devel python*-ply
 
-.PHONY: help install-dep build build-package build-package-hyperscan checkstyle distclean
+.PHONY: help install-dep build build-package build-install-package-hyperscan checkstyle distclean
 
 help:
 	@echo "Make Targets:"
-	@echo " install-dep             - install software dependencies"
-	@echo " build-package           - build rpm or deb package"
-	@echo " build-package-hyperscan - build rpm or deb package for hyperscan"
-	@echo " checkstyle              - checkstyle"
-	@echo " distclean               - remove all build directory"
+	@echo " install-dep                       - install software dependencies"
+	@echo " build-package                     - build rpm or deb package"
+	@echo " build-install-package-hyperscan   - build rpm or deb package for hyperscan"
+	@echo " checkstyle                        - checkstyle"
+	@echo " distclean                         - remove all build directory"
 
 install-dep:
 ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
@@ -60,23 +61,25 @@ ifeq ($(OS_VERSION_ID),14.04)
 	@sudo -E apt-get -y --force-yes install software-properties-common
 endif
 	@sudo -E apt-get update
+	@curl -s https://packagecloud.io/install/repositories/fdio/2001/script.deb.sh | sudo bash
 	@sudo -E apt-get $(APT_ARGS) -y --force-yes install $(DEB_DEPENDS)
 else ifeq ($(OS_ID),centos)
+	@curl -s https://packagecloud.io/install/repositories/fdio/2001/script.rpm.sh | sudo bash
 	@sudo -E yum install -y $(RPM_DEPENDS) epel-release centos-release-scl devtoolset-7
 else
 	$(error "This option currently works only on Ubuntu, Debian, Centos or openSUSE systems")
 endif
 
-build-package-hyperscan:
+build-install-package-hyperscan:
 	@rm -rf $(BR)/build-package-hyperscan/;
 	@mkdir -p $(BR)/build-package-hyperscan/; cd $(BR)/build-package-hyperscan/;\
 	git clone https://github.com/intel/hyperscan.git; cd hyperscan; \
-	git apply $(BR)/../0001-build-package-for-hyperscan.patch; make build-package;\
+	git apply $(BR)/../0001-build-package-for-hyperscan.patch; make build-install-package;
 
 build-package:
 ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
 	@mkdir -p $(BR)/build-package/; cd $(BR)/build-package/;\
-        $(cmake) -DCMAK_BUILD_TYPE=Release\
+        $(cmake) -DCMAKE_BUILD_TYPE=Release\
         -DCMAKE_INSTALL_PREFIX=/usr $(WS_ROOT)/;\
         make package -j$(nproc);
 else ifeq ($(OS_ID),centos)

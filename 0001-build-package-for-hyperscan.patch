@@ -92,12 +92,12 @@ index 0000000..2582990
 +#Dependencies to build
 +RPM_DEPENDS = curl autoconf automake ccache cmake3 wget gcc gcc-c++ git gtest gtest-devel ragel python-sphinx boost169-devel
 +
-+.PHONY: help install-dep build build-package clean distclean
++.PHONY: help install-dep build build-install-package clean distclean
 +
 +help:
 +	@echo "Make Targets:"
 +	@echo " install-dep            - install software dependencies"
-+	@echo " build-package          - build rpm or deb package"
++	@echo " build-install-package          - build rpm or deb package"
 +	@echo " clean                  - clean all build"
 +	@echo " distclean              - remove all build directory"
 +
@@ -115,19 +115,19 @@ index 0000000..2582990
 +endif
 +
 +
-+build-package:
++build-install-package:
 +ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
 +	@mkdir -p $(BR)/build-package/; cd $(BR)/build-package/;\
-+	$(cmake) -DCMAKE_BUILD_TYPE=Release \
-+	-DCMAKE_INSTALL_PREFIX:PATH=/usr $(WS_ROOT)/ -DBUILD_STATIC_AND_SHARED=ON;\
-+	make package -j30;
++       $(cmake) -DCMAKE_BUILD_TYPE=Release \
++       -DCMAKE_INSTALL_PREFIX:PATH=/usr $(WS_ROOT)/ -DBUILD_STATIC_AND_SHARED=ON;\
++       make package; yes|dpkg -i hyperscan*.deb
 +else ifeq ($(OS_ID),centos)
 +	@rm -rf $(BR)/../include/boost;\
-+	ln -vs /usr/include/boost169/boost $(BR)/../include/boost
++       ln -vs /usr/include/boost169/boost $(BR)/../include/boost
 +	@mkdir -p $(BR)/build-package/; cd $(BR)/build-package/;\
-+	$(cmake) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_AND_SHARED=ON \
-+	-DCMAKE_INSTALL_PREFIX:PATH=/usr $(WS_ROOT)/;\
-+	make package -j$(nproc);
++       $(cmake) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_AND_SHARED=ON \
++       -DCMAKE_INSTALL_PREFIX:PATH=/usr $(WS_ROOT)/;\
++       make package; yes|rpm -i hyperscan*.rpm
 +endif
 +	@# NEW INSTRUCTIONS TO BUILD-PACKAGE MUST BE DECLARED ON A NEW LINE WITH
 +	@# '@' NOT WITH ';' ELSE BUILD-PACKAGE WILL NOT RETURN THE CORRECT

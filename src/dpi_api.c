@@ -64,15 +64,6 @@ typedef enum
 #define REPLY_MSG_ID_BASE dm->msg_id_base
 #include <vlibapi/api_helper_macros.h>
 
-static void
-setup_message_id_table (dpi_main_t * dm, api_main_t * am)
-{
-#define _(id,n,crc) \
-  vl_msg_api_add_msg_name_crc (am, #n "_" #crc, id + dm->msg_id_base);
-  foreach_vl_msg_name_crc_dpi;
-#undef _
-}
-
 #define foreach_dpi_plugin_api_msg                          \
 _(DPI_FLOW_ADD_DEL, dpi_flow_add_del)
 
@@ -144,7 +135,7 @@ dpi_api_hookup (vlib_main_t * vm)
 #undef _
 
   /* Add our API messages to the global name_crc hash table */
-  setup_message_id_table (dm, &api_main);
+  dm->msg_id_base = setup_message_id_table ();
 
   return 0;
 }

@@ -259,7 +259,7 @@ dpi_flow_add_del (dpi_add_del_flow_args_t * a, u32 * flow_idp)
   vnet_main_t *vnm = dm->vnet_main;
   dpi4_flow_key_t key4;
   dpi6_flow_key_t key6;
-  dpi_flow_entry_t *p;
+  u32 *p;
   u32 is_ip6 = a->is_ipv6;
   u32 flow_id;
   dpi_flow_entry_t *flow;
@@ -395,9 +395,9 @@ dpi_reverse_flow_add_del (dpi_add_del_flow_args_t * a, u32 flow_id)
   vnet_main_t *vnm = dm->vnet_main;
   dpi4_flow_key_t key4;
   dpi6_flow_key_t key6;
-  dpi_flow_entry_t *p;
   u32 is_ip6 = a->is_ipv6;
   dpi_flow_entry_t *flow;
+  u32 *p;
 
   int not_found;
   if (!is_ip6)
@@ -463,7 +463,6 @@ dpi_reverse_flow_add_del (dpi_add_del_flow_args_t * a, u32 flow_id)
       if (!p)
 	return VNET_API_ERROR_NO_SUCH_ENTRY;
 
-      flow_id = is_ip6 ? key6.value : key4.value;
       flow = pool_elt_at_index (dm->dpi_flows, flow_id);
 
       if (!is_ip6)
@@ -473,8 +472,6 @@ dpi_reverse_flow_add_del (dpi_add_del_flow_args_t * a, u32 flow_id)
 
       if (flow->flow_index != ~0)
 	vnet_flow_del (vnm, flow->flow_index);
-
-      pool_put (dm->dpi_flows, flow);
     }
 
   return 0;
