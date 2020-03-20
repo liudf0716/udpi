@@ -71,7 +71,7 @@ fi
 cd ${UDPI_DIR}
 git status
 for i in ${FILELIST}; do
-    if [ -f ${i} ] && [ ${i} != "build-root/scripts/checkstyle.sh" ] && [ ${i} != "extras/emacs/fix-coding-style.el" ]; then
+    if [ -f ${i} ] && [ ${i} != "scripts/checkstyle.sh" ] && [ ${i} != "extras/emacs/fix-coding-style.el" ]; then
         grep -q "fd.io coding-style-patch-verification: ON" ${i}
         if [ $? == 0 ]; then
             EXTENSION=`basename ${i} | sed 's/^\w\+.//'`
@@ -144,7 +144,7 @@ else
     echo "*******************************************************************"
     echo "* VPP CHECKSTYLE FAILED"
     echo "* CONSULT FAILURE LOG ABOVE"
-    echo "* NOTE: Running 'build-root/scripts/checkstyle.sh --fix' *MAY* fix the issue"
+    echo "* NOTE: Running 'scripts/checkstyle.sh --fix' *MAY* fix the issue"
     echo "*******************************************************************"
 fi
 exit ${EXIT_CODE}

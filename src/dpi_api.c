@@ -114,10 +114,19 @@ out:
   /* *INDENT-ON* */
 }
 
+static void
+setup_message_id_table (api_main_t * am)
+{
+#define _(id,n,crc) vl_msg_api_add_msg_name_crc (am, #n "_" #crc, id);
+  foreach_vl_msg_name_crc_dpi;
+#undef _
+}
+
 static clib_error_t *
 dpi_api_hookup (vlib_main_t * vm)
 {
   dpi_main_t *dm = &dpi_main;
+  api_main_t *am = vlibapi_get_main ();
 
   u8 *name = format (0, "dpi_%08x%c", api_version, 0);
   dm->msg_id_base = vl_msg_api_get_msg_ids
@@ -135,7 +144,7 @@ dpi_api_hookup (vlib_main_t * vm)
 #undef _
 
   /* Add our API messages to the global name_crc hash table */
-  dm->msg_id_base = setup_message_id_table ();
+  setup_message_id_table (am);
 
   return 0;
 }

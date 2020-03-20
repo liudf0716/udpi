@@ -37,15 +37,15 @@ endif
 #####
 #Dependencies to build
 DEB_DEPENDS = curl build-essential autoconf automake ccache git cmake wget coreutils ragel
-DEB_DEPENDS += libboost-dev vpp vpp-dev python*-ply
+DEB_DEPENDS += libboost-dev python*-ply
 #####
 #RPM#
 #####
 #Dependencies to build
 RPM_DEPENDS = curl autoconf automake ccache cmake3 wget gcc gcc-c++ git gtest gtest-devel
-RPM_DEPENDS += ragel python-sphinx boost169-devel vpp vpp-devel python*-ply
+RPM_DEPENDS += ragel python-sphinx boost169-devel python*-ply devtoolset-7
 
-.PHONY: help install-dep build build-package build-install-package-hyperscan checkstyle distclean
+.PHONY: help install-dep build build-package build-install-package-hyperscan checkstyle distclean fixstyle
 
 help:
 	@echo "Make Targets:"
@@ -54,6 +54,7 @@ help:
 	@echo " build-install-package-hyperscan   - build rpm or deb package for hyperscan"
 	@echo " checkstyle                        - checkstyle"
 	@echo " distclean                         - remove all build directory"
+	@echo " fixstyle                          - fix coding style"
 
 install-dep:
 ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
@@ -61,11 +62,18 @@ ifeq ($(OS_VERSION_ID),14.04)
 	@sudo -E apt-get -y --force-yes install software-properties-common
 endif
 	@sudo -E apt-get update
+ifeq ($(shell dpkg -l|grep vpp-dev),)
 	@curl -s https://packagecloud.io/install/repositories/fdio/2001/script.deb.sh | sudo bash
-	@sudo -E apt-get $(APT_ARGS) -y --force-yes install $(DEB_DEPENDS)
+	@sudo -E apt-get -y --force-yes install vpp vpp-dev
+endif
+	@sudo -E apt-get -y --force-yes install $(DEB_DEPENDS)
 else ifeq ($(OS_ID),centos)
+	@sudo -E yum install -y epel-release centos-release-scl
+	@sudo -E yum install -y $(RPM_DEPENDS)
+ifeq ($(shell rpm -qa|grep vpp-dev),)
 	@curl -s https://packagecloud.io/install/repositories/fdio/2001/script.rpm.sh | sudo bash
-	@sudo -E yum install -y $(RPM_DEPENDS) epel-release centos-release-scl devtoolset-7
+	@sudo -E yum install -y vpp vpp-devel
+endif
 else
 	$(error "This option currently works only on Ubuntu, Debian, Centos or openSUSE systems")
 endif
@@ -96,6 +104,10 @@ endif
 
 checkstyle:
 	@$(BR)/../scripts/checkstyle.sh
+
+fixstyle:
+	@$(BR)/../scripts/checkstyle.sh --fix
+
 
 distclean:
 	@rm -rf $(BR)/build-package*

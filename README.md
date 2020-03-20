@@ -21,18 +21,36 @@ Details of the changes leading up to this version of UDPI can be found under
 ```
 From the code tree root
 
+if you have not any sepcical request for udpi compile
+you should use the Makefile in the code tree root (suggest to install all the vpp packages first)
+
+Just run blew command
+
+$ make install-dep
+$ make build-install-package-hyperscan
+$ make build-package
+
+then you can use
+$ rpm -i --force build-root/build-packge/udpi*.rpm # you may meet conflict form vpp-devel, but this is not a conflict, force install
+or
+$ dpkg -i build-root/build-package/udpi*.dep
+
+
+else you should use cmake directly, like blew
+
+
 (VPP installed with DEB or RPM pkg)
 $ cd udpi-plugin
 $ mkdir -p build
 $ cd build
-$ cmake .. -DCMAKE_INSTALL_PREFIX=/usr #(add "-DCMKAE_INSTALL_LIBDIR=lib" on centos and it's releated)
+$ cmake .. -DCMAKE_INSTALL_PREFIX=/usr #(add "-DCMKAE_INSTALL_LIBDIR=lib -DCMAKE_PROGRAM_PATH:PATH="/opt/rh/devtoolset-7/root/bin"" and change cmake to cmake3 on centos and it's releated)
 $ make package
 
 (VPP source code -- build type RELEASE)
 $ cd udpi-plugin
 $ mkdir -p build
 $ cd build
-$ cmake .. -DVPP_HOME=<vpp dir>/build-root/install-vpp-native/vpp -DCMAKE_INSTALL_PREFIX=<vpp src>/build-root/install-vpp-native/vpp  #(add "-DCMKAE_INSTALL_LIBDIR=lib" on centos and it's releated)
+$ cmake .. -DVPP_HOME=<vpp dir>/build-root/install-vpp-native/vpp -DCMAKE_INSTALL_PREFIX=<vpp src>/build-root/install-vpp-native/vpp  #(add "-DCMKAE_INSTALL_LIBDIR=lib -DCMAKE_PROGRAM_PATH:PATH="/opt/rh/devtoolset-7/root/bin"" and change cmake to cmake3 on centos and it's releated)
 $ make
 $ sudo make install
 
@@ -40,7 +58,7 @@ $ sudo make install
 $ cd udpi-plugin
 $ mkdir -p build
 $ cd build
-$ cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DVPP_HOME=<vpp dir>/build-root/install-vpp_debug-native/vpp -DCMAKE_INSTALL_PREFIX=<vpp src>/build-root/install-vpp_debug-native/vpp  #(add "-DCMKAE_INSTALL_LIBDIR=lib" on centos and it's releated)
+$ cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DVPP_HOME=<vpp dir>/build-root/install-vpp_debug-native/vpp -DCMAKE_INSTALL_PREFIX=<vpp src>/build-root/install-vpp_debug-native/vpp  #(add "-DCMKAE_INSTALL_LIBDIR=lib -DCMAKE_PROGRAM_PATH:PATH="/opt/rh/devtoolset-7/root/bin"" and change cmake to cmake3 on centos and it's releated)
 $ make
 $ sudo make install
 
@@ -69,14 +87,14 @@ Build dependencies:
 
 - Hyperscan
 
-- VPP 19.08
+- VPP 20.01
   - DEB packages (can be found https://packagecloud.io/fdio/release/install):
   - libvppinfra-dev
   - vpp-dev
 
 Running dependencies:
 
-- VPP 19.08
+- VPP 20.01
   - DEB packages (can be found https://packagecloud.io/fdio/release/install):
   - vpp
   - vpp-plugin-core
@@ -169,7 +187,9 @@ $ sudo vpp -c /etc/vpp/startup.conf
 ```
 
 ### Configure udpi plugin ###
-The udpi plugin can be configured either using the VPP command-line interface (CLI), through a configuration file or through the VPP binary api
+The udpi plugin can be configured either using the VPP command-line interface (CLI), through the VPP binary api
+
+see src/dpi_plugin_doc.md in details. 
 
 #### udpi plugin CLI ####
 
